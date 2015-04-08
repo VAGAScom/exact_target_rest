@@ -23,11 +23,11 @@ module ExactTargetRest
         resp = endpoint.post do |p|
           p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
           p.headers['Authorization'] = "Bearer #{access_token}"
-          p.body = {to: {
-              address: email_address,
-              subscriber_key: subscriber_key,
-              contact_attributes: {
-                  subscriber_attributes: prepare_attributes(data_extension_attributes)
+          p.body = {To: {
+              Address: email_address,
+              SubscriberKey: subscriber_key,
+              ContactAttributes: {
+                  SubscriberAttributes: prepare_attributes(data_extension_attributes)
               }
           }}
         end
