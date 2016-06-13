@@ -50,7 +50,7 @@ module ExactTargetRest
 
     # Already authorized and NOT expired?
     def authorized?
-      @access_token && @expires_in < Time.now
+      @access_token && @expires_in > Time.now
     end
 
     protected
