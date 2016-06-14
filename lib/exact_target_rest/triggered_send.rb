@@ -12,24 +12,46 @@ module ExactTargetRest
     end
 
     # TriggeredSend for just one subscriber.
-    #
-    # @param email_address [String] Email to send.
+    # @param request_type [String] ASYNC or SYNC.
+    # @param to_address [String] Email to send.
     # @param subscriber_key [String] SubscriberKey (it uses Email if not set).
+    # @param from_address [String] Sender email address.
+    # @param from_name [String] Sender name.
+    # @param subscriber_attributes [{String => String, ...}] List of attributes with keys as String (when your ExactTarget's fields doesn't have a pattern :P)
     # @param data_extension_attributes [{Symbol => Object}] List of attributes (in snake_case)
     #   that will be used in TriggeredSend and will be saved in related DataExtension
     #   (in CamelCase).
-    def send_one(email_address:, subscriber_key: email_address, ** data_extension_attributes)
+    def send_one(
+      request_type: "ASYNC",
+      email_address:,
+      subscriber_key: email_address,
+      from_address: "",
+      from_name: "",
+      subscriber_attributes: nil,
+      ** data_extension_attributes
+      )
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
           p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
           p.headers['Authorization'] = "Bearer #{access_token}"
-          p.body = {To: {
+          p.body = {
+            From: {
+              Address: from_address,
+              Name: from_name
+            },
+            To: {
               Address: email_address,
               SubscriberKey: subscriber_key,
               ContactAttributes: {
-                  SubscriberAttributes: prepare_attributes(data_extension_attributes)
+                  SubscriberAttributes:
+                    subscriber_attributes ||
+                    prepare_attributes(data_extension_attributes)
               }
-          }}
+            },
+            OPTIONS: {
+              RequestType: request_type
+            }
+          }
         end
         raise NotAuthorizedError if resp.status == 401
         resp
