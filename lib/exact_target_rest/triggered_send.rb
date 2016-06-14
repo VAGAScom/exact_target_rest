@@ -12,23 +12,39 @@ module ExactTargetRest
     end
 
     # TriggeredSend for just one subscriber.
-    # @param request_type [String] ASYNC or SYNC.
     # @param to_address [String] Email to send.
     # @param subscriber_key [String] SubscriberKey (it uses Email if not set).
-    # @param from_address [String] Sender email address.
-    # @param from_name [String] Sender name.
-    # @param subscriber_attributes [{String => String, ...}] List of attributes with keys as String (when your ExactTarget's fields doesn't have a pattern :P)
     # @param data_extension_attributes [{Symbol => Object}] List of attributes (in snake_case)
     #   that will be used in TriggeredSend and will be saved in related DataExtension
     #   (in CamelCase).
     def send_one(
+      email_address:,
+      subscriber_key: email_address,
+      ** data_extension_attributes
+      )
+      deliver(
+        email_address: email_address,
+        subscriber_key: subscriber_key,
+        subscriber_attributes: prepare_attributes(data_extension_attributes)
+      )
+    end
+
+    # TriggeredSend for just one subscriber.
+    # @param request_type [String] ASYNC or SYNC.
+    # @param to_address [String] Email to send.
+    # @param subscriber_key [String] SubscriberKey.
+    # => it uses Email if not set
+    # @param from_address [String] Sender email address.
+    # @param from_name [String] Sender name.
+    # @param subscriber_attributes [{String => String, ...}] List of attributes
+    # => Keys as Strings (when your ExactTarget's fields doesn't have a pattern)
+    def deliver(
       request_type: "ASYNC",
       email_address:,
       subscriber_key: email_address,
       from_address: "",
       from_name: "",
-      subscriber_attributes: nil,
-      ** data_extension_attributes
+      subscriber_attributes: nil
       )
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
@@ -43,9 +59,7 @@ module ExactTargetRest
               Address: email_address,
               SubscriberKey: subscriber_key,
               ContactAttributes: {
-                  SubscriberAttributes:
-                    subscriber_attributes ||
-                    prepare_attributes(data_extension_attributes)
+                  SubscriberAttributes: subscriber_attributes
               }
             },
             OPTIONS: {
