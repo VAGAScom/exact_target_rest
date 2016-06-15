@@ -47,7 +47,7 @@ OR
 ts.deliver(email_address: 'uga@kabuga.com', subscriber_attributes: { 'An Attribute' => 'XXX', 'Another_Attribute' => 'YYY' })
 ```
 
-**email_address** is mandatory, any other field will be put in the DataExtension (or List) associated with the TriggeredSend. You can also pass "subscriber_key" as parameter, if absent, it will use the value in "email_address" as default value.
+**email_address** is mandatory, any other field will be put in the DataExtension (or List) associated with the TriggeredSend. You can also pass **subscriber_key** as parameter, if absent, it will use the value in **email_address** as default value.
 
 In first example, with method `send_one`, all other attributes will be converted to CamelCase (ExactTarget convention) before send. So, **an_attribute** and **another_attribute** would become "AnAttribute" and "AnotherAttribute". If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
 
