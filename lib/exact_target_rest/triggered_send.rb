@@ -44,7 +44,7 @@ module ExactTargetRest
       subscriber_key: email_address,
       from_address: "",
       from_name: "",
-      subscriber_attributes: nil
+      subscriber_attributes: {}
       )
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
