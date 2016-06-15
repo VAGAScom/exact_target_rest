@@ -37,14 +37,21 @@ auth = ExactTargetRest::Authorization.new(client_id, client_secret)
 ```ruby
 external_key = 'My TriggeredSend External Key'
 ts = ExactTargetRest::TriggeredSend.new(auth, external_key)
+```
+And call:
+```ruby
 ts.send_one(email_address: 'uga@kabuga.com', an_attribute: 'XXX', another_attribute: 'YYY')
+```
+OR
+```ruby
+ts.deliver(email_address: 'uga@kabuga.com', subscriber_attributes: { 'An Attribute' => 'XXX', 'Another_Attribute' => 'YYY' })
 ```
 
 **email_address** is mandatory, any other field will be put in the DataExtension (or List) associated with the TriggeredSend. You can also pass "subscriber_key" as parameter, if absent, it will use the value in "email_address" as default value.
 
-All other attributes will be converted to CamelCase (ExactTarget convention) before send. So, "an_attribute" and "another_attribute" would become "AnAttribute" and "AnotherAttribute".
+In first example, with method `send_one`, all other attributes will be converted to CamelCase (ExactTarget convention) before send. So, "an_attribute" and "another_attribute" would become "AnAttribute" and "AnotherAttribute". If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
 
-If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
+If you have DataExtension's keys with spaces or any unusual pattern, use the method `deliver`. You can send a hash using parameter "subscriber\_attributes".
 
 ```ruby
 ts = ExactTargetRest::TriggeredSend.new(auth, external_key, snake_to_camel: false)
