@@ -49,13 +49,14 @@ ts.deliver(email_address: 'uga@kabuga.com', subscriber_attributes: { 'An Attribu
 
 **email_address** is mandatory, any other field will be put in the DataExtension (or List) associated with the TriggeredSend. You can also pass "subscriber_key" as parameter, if absent, it will use the value in "email_address" as default value.
 
-In first example, with method `send_one`, all other attributes will be converted to CamelCase (ExactTarget convention) before send. So, "an_attribute" and "another_attribute" would become "AnAttribute" and "AnotherAttribute". If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
-
-If you have DataExtension's keys with spaces or any unusual pattern, use the method `deliver`. You can send a hash using parameter "subscriber\_attributes".
+In first example, with method `send_one`, all other attributes will be converted to CamelCase (ExactTarget convention) before send. So, **an_attribute** and **another_attribute** would become "AnAttribute" and "AnotherAttribute". If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
 
 ```ruby
 ts = ExactTargetRest::TriggeredSend.new(auth, external_key, snake_to_camel: false)
 ```
+
+If you have DataExtension's keys with spaces or any unusual pattern, use the method `deliver`. You can send a hash using parameter **subscriber\_attributes**.
+
 
 ### DataExtension Upsert
 
