@@ -34,23 +34,23 @@ describe TriggeredSend do
 
   describe '#deliver' do
     it "sends a simple TriggeredSend" do
-      response = subject.deliver(email_address: "jake@oo.com")
+      response = subject.with_options(email_address: "jake@oo.com").deliver
       expect(response.body["requestId"]).to eq "simple-response-id"
     end
 
     it "sends a TriggeredSend with DataExtension" do
-      response = subject.deliver(
+      response = subject.with_options(
         email_address: "jake@oo.com",
         subscriber_attributes: { City: "São Paulo", Zip: "04063-040" }
-        )
+        ).deliver
       expect(response.body["requestId"]).to eq "data-extension-response-id"
     end
 
     it "sends a TriggeredSend with a DataExtension's key with spaces" do
-      response = subject.deliver(
+      response = subject.with_options(
         email_address: "jake@oo.com",
         subscriber_attributes: { "City" => "São Paulo", "Profile ID" => "42" }
-        )
+        ).deliver
       expect(response.body["requestId"]).to eq "uncommon-key-response-id"
     end
 

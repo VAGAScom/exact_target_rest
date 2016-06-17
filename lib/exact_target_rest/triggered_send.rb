@@ -22,14 +22,14 @@ module ExactTargetRest
       subscriber_key: email_address,
       ** data_extension_attributes
       )
-      deliver(
+      with_options(
         email_address: email_address,
         subscriber_key: subscriber_key,
         subscriber_attributes: prepare_attributes(data_extension_attributes)
-      )
+      ).deliver
     end
 
-    # TriggeredSend for just one subscriber.
+    # Load attributes and return "self". To send using async methods.
     # @param request_type [String] ASYNC or SYNC.
     # @param to_address [String] Email to send.
     # @param subscriber_key [String] SubscriberKey.
@@ -38,7 +38,7 @@ module ExactTargetRest
     # @param from_name [String] Sender name.
     # @param subscriber_attributes [{String => String, ...}] List of attributes
     # => Keys as Strings (when your ExactTarget's fields doesn't have a pattern)
-    def deliver(
+    def with_options(
       request_type: "ASYNC",
       email_address:,
       subscriber_key: email_address,
@@ -46,24 +46,36 @@ module ExactTargetRest
       from_name: "",
       subscriber_attributes: {}
       )
+      @request_type = request_type
+      @email_address = email_address
+      @subscriber_key = subscriber_key
+      @from_address = from_address
+      @from_name = from_name
+      @subscriber_attributes = subscriber_attributes
+
+      self
+    end
+
+    # TriggeredSend with loaded attributes.
+    def deliver
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
           p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
           p.headers['Authorization'] = "Bearer #{access_token}"
           p.body = {
             From: {
-              Address: from_address,
-              Name: from_name
+              Address: @from_address,
+              Name: @from_name
             },
             To: {
-              Address: email_address,
-              SubscriberKey: subscriber_key,
+              Address: @email_address,
+              SubscriberKey: @subscriber_key,
               ContactAttributes: {
-                  SubscriberAttributes: subscriber_attributes
+                  SubscriberAttributes: @subscriber_attributes
               }
             },
             OPTIONS: {
-              RequestType: request_type
+              RequestType: @request_type
             }
           }
         end
