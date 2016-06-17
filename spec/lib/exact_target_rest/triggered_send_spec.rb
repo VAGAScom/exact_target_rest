@@ -3,11 +3,12 @@ require 'spec_helper'
 describe TriggeredSend do
 
   let(:external_key) { "12345" }
-  let(:auth_bearer) { "Y9axRxR9bcvSW2cc0IwoWeq7" }
+  let(:access_token) { "Y9axRxR9bcvSW2cc0IwoWeq7" }
+  let(:expires_in) { 3600 }
 
   subject do
     authorization = instance_double("ExactTargetRest::Authorization")
-    allow(authorization).to receive(:with_authorization).and_yield(auth_bearer)
+    allow(authorization).to receive(:with_authorization).and_yield(access_token)
     described_class.new(authorization,external_key)
   end
 
@@ -68,7 +69,7 @@ describe TriggeredSend do
     stub_request(:post, triggered_send_url).
       with(
         :body => "{\"From\":{\"Address\":\"\",\"Name\":\"\"},\"To\":{\"Address\":\"jake@oo.com\",\"SubscriberKey\":\"jake@oo.com\",\"ContactAttributes\":{\"SubscriberAttributes\":{\"City\":\"São Paulo\",\"Zip\":\"04063-040\"}}},\"OPTIONS\":{\"RequestType\":\"ASYNC\"}}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{auth_bearer}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
+        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
       ).
       to_return(
         headers: {"Content-Type"=> "application/json"},
@@ -79,7 +80,7 @@ describe TriggeredSend do
     stub_request(:post, triggered_send_url).
       with(
         :body => "{\"From\":{\"Address\":\"\",\"Name\":\"\"},\"To\":{\"Address\":\"jake@oo.com\",\"SubscriberKey\":\"jake@oo.com\",\"ContactAttributes\":{\"SubscriberAttributes\":{\"City\":\"São Paulo\",\"Profile ID\":\"42\"}}},\"OPTIONS\":{\"RequestType\":\"ASYNC\"}}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{auth_bearer}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
+        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
       ).
       to_return(
         headers: {"Content-Type"=> "application/json"},
@@ -90,7 +91,7 @@ describe TriggeredSend do
     stub_request(:post, triggered_send_url).
       with(
         :body => "{\"From\":{\"Address\":\"\",\"Name\":\"\"},\"To\":{\"Address\":\"jake@oo.com\",\"SubscriberKey\":\"jake@oo.com\",\"ContactAttributes\":{\"SubscriberAttributes\":{}}},\"OPTIONS\":{\"RequestType\":\"ASYNC\"}}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{auth_bearer}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
+        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
         ).
       to_return(
         headers: {"Content-Type"=> "application/json"},
