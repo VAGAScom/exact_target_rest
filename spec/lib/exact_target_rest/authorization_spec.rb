@@ -24,9 +24,9 @@ describe Authorization do
     end
 
     it "returns Unauthorized" do
-      subject.new("invalid", client_secret).with_authorization do |access_token|
-        expect(access_token).to be_nil
-      end
+      expect {
+        subject.new("invalid", client_secret).with_authorization
+      }.to raise_error NotAuthorizedError
     end
   end
 
@@ -39,9 +39,9 @@ describe Authorization do
     end
 
     it "returns Unauthorized" do
-      auth = subject.new("invalid", client_secret).authorize!
-
-      expect(auth).to be_nil
+      expect {
+        subject.new("invalid", client_secret).authorize!
+      }.to raise_error NotAuthorizedError
     end
   end
 

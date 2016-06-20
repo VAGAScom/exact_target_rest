@@ -29,8 +29,6 @@ module ExactTargetRest
 
     # Execute authorization, keeps an access token and returns the result
     def authorize!
-      tries ||= 1
-
       resp = endpoint.post do |p|
         p.body = {clientId: @client_id,
                   clientSecret: @client_secret}
@@ -42,9 +40,6 @@ module ExactTargetRest
       else
         fail NotAuthorizedError
       end
-    rescue NotAuthorizedError
-      tries -= 1
-      retry if tries >= 0
     end
 
     # Already authorized and NOT expired?
