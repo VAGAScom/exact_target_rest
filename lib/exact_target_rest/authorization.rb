@@ -21,20 +21,13 @@ module ExactTargetRest
     #
     # @yield [access_token] Block to be executed
     # @yieldparam access_token [String] Access token used to authorize a request
+    # @yieldparam expires_in [String] Time to token's expire
     def with_authorization
       authorize! unless authorized?
-      tries = 1
-      begin
-        yield @access_token
-      rescue NotAuthorizedError
-        authorize!
-        tries -= 1
-        retry if tries >= 0
-      end
-
+      yield @access_token
     end
 
-    # Execute authorization and keeps an access token
+    # Execute authorization, keeps an access token and returns the result
     def authorize!
       resp = endpoint.post do |p|
         p.body = {clientId: @client_id,
@@ -43,8 +36,9 @@ module ExactTargetRest
       if resp.success?
         @access_token = resp.body['accessToken']
         @expires_in = Time.now + resp.body['expiresIn']
+        { access_token: @access_token, expires_in: @expires_in }
       else
-        fail resp.body.inspect
+        fail NotAuthorizedError
       end
     end
 

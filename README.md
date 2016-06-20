@@ -34,20 +34,55 @@ auth = ExactTargetRest::Authorization.new(client_id, client_secret)
 
 ### TriggeredSend Activation
 
+There are two ways to use.
+
+The first calls `send_one` and receives DataExtensions as parameters:
+
 ```ruby
 external_key = 'My TriggeredSend External Key'
 ts = ExactTargetRest::TriggeredSend.new(auth, external_key)
 ts.send_one(email_address: 'uga@kabuga.com', an_attribute: 'XXX', another_attribute: 'YYY')
 ```
 
-**email_address** is mandatory, any other field will be put in the DataExtension (or List) associated with the TriggeredSend. You can also pass "subscriber_key" as parameter, if absent, it will use the value in "email_address" as default value.
+**email_address** is mandatory, any other field will be put in the DataExtension (or List) associated with the TriggeredSend. You can also pass **subscriber_key** as parameter, if absent, it will use the value in **email_address** as default value.
 
-All other attributes will be converted to CamelCase (ExactTarget convention) before send. So, "an_attribute" and "another_attribute" would become "AnAttribute" and "AnotherAttribute".
-
-If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
+In first example, with method `send_one`, all other attributes will be converted to CamelCase (ExactTarget convention) before send. So, **an_attribute** and **another_attribute** would become "AnAttribute" and "AnotherAttribute". If you don't want this behavior, pass the flag "snake\_to\_camel: false" in the constructor:
 
 ```ruby
 ts = ExactTargetRest::TriggeredSend.new(auth, external_key, snake_to_camel: false)
+```
+
+The second way helps in two situations:
+
+- If you have DataExtension's keys with spaces or any unusual pattern
+
+```ruby
+external_key = 'My TriggeredSend External Key'
+ts = ExactTargetRest::TriggeredSend.new(auth, external_key)
+ts.with_options(email_address: 'uga@kabuga.com', subscriber_attributes: { 'An Attribute' => 'XXX', 'Another_Attribute' => 'YYY' }).deliver
+```
+
+- if you have to call the api asynchronously
+
+```ruby
+def deliver
+  external_key = 'My TriggeredSend External Key'
+  triggered_send = ExactTargetRest::TriggeredSend.new(auth, external_key)
+  triggered_send.with_options(email_address: 'uga@kabuga.com')
+
+  Worker.perform_async(triggered_send.to_yaml)
+end
+
+class Worker
+  include Sidekiq::Worker
+
+  sidekiq_options queue: :exact_target_mailer
+
+  def perform(triggered_send)
+    YAML::load(triggered_send).deliver
+  end
+end
+
 ```
 
 ### DataExtension Upsert
