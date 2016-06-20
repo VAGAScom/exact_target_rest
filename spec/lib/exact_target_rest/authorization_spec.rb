@@ -34,8 +34,8 @@ describe Authorization do
     it "returns a valid authorization" do
       auth = subject.new(client_id, client_secret).authorize!
 
-      expect(auth[:access_token]).to eq access_token
-      expect(auth[:expires_in]).not_to be_nil
+      expect(auth.access_token).to eq access_token
+      expect(auth.expires_in).not_to be_nil
     end
 
     it "returns Unauthorized" do

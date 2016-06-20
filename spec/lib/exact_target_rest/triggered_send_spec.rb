@@ -7,8 +7,8 @@ describe TriggeredSend do
   let(:expires_in) { 3600 }
 
   subject do
-    authorization = instance_double("ExactTargetRest::Authorization")
-    allow(authorization).to receive(:with_authorization).and_yield(access_token)
+    authorization = ExactTargetRest::Authorization.new("client_id","client_sec")
+    allow(authorization).to receive(:access_token).and_return(access_token)
     described_class.new(authorization,external_key)
   end
 

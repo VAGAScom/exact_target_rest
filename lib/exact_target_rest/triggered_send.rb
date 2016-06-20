@@ -2,16 +2,16 @@ module ExactTargetRest
   class TriggeredSend
     # Execute TriggeredSends to one or several subscribers.
     #
-    # @param authorization [Authorization]
+    # @param auth [Authorization || String]
     # @param external_key [String] The string that identifies the TriggeredSend
     # @param snake_to_camel [Boolean] Attributes should be converted to CamelCase? (default true)
-    def initialize(authorization, external_key, snake_to_camel: true)
-      @authorization = authorization
+    def initialize(auth, external_key, snake_to_camel: true)
+      @auth = auth
       @external_key = external_key
       @snake_to_camel = snake_to_camel
     end
 
-    # TriggeredSend for just one subscriber.
+    # TriggeredSend for just one subscriber. This method exists to keep compatibility.
     # @param to_address [String] Email to send.
     # @param subscriber_key [String] SubscriberKey (it uses Email if not set).
     # @param data_extension_attributes [{Symbol => Object}] List of attributes (in snake_case)
@@ -22,11 +22,13 @@ module ExactTargetRest
       subscriber_key: email_address,
       ** data_extension_attributes
       )
-      with_options(
-        email_address: email_address,
-        subscriber_key: subscriber_key,
-        subscriber_attributes: prepare_attributes(data_extension_attributes)
-      ).deliver
+      @auth.with_authorization do |access_token|
+        with_options(
+          email_address: email_address,
+          subscriber_key: subscriber_key,
+          subscriber_attributes: prepare_attributes(data_extension_attributes)
+        ).deliver
+      end
     end
 
     # Load attributes and return "self". To send using async methods.
@@ -58,35 +60,30 @@ module ExactTargetRest
 
     # TriggeredSend with loaded attributes.
     def deliver
-      tries ||= 1
-      @authorization.with_authorization do |access_token|
-        resp = endpoint.post do |p|
-          p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
-          p.headers['Authorization'] = "Bearer #{access_token}"
-          p.body = {
-            From: {
-              Address: @from_address,
-              Name: @from_name
-            },
-            To: {
-              Address: @email_address,
-              SubscriberKey: @subscriber_key,
-              ContactAttributes: {
-                  SubscriberAttributes: @subscriber_attributes
-              }
-            },
-            OPTIONS: {
-              RequestType: @request_type
+      access_token = @auth.instance_of?(ExactTargetRest::Authorization) ? @auth.access_token : @auth
+
+      resp = endpoint.post do |p|
+        p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
+        p.headers['Authorization'] = "Bearer #{access_token}"
+        p.body = {
+          From: {
+            Address: @from_address,
+            Name: @from_name
+          },
+          To: {
+            Address: @email_address,
+            SubscriberKey: @subscriber_key,
+            ContactAttributes: {
+                SubscriberAttributes: @subscriber_attributes
             }
+          },
+          OPTIONS: {
+            RequestType: @request_type
           }
-        end
-        raise NotAuthorizedError if resp.status == 401
-        resp
+        }
       end
-    rescue NotAuthorizedError
-      tries -= 1
-      retry if tries >= 0
-      raise NotAuthorizedError
+      raise NotAuthorizedError if resp.status == 401
+      resp
     end
 
     protected
