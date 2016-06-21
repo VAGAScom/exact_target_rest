@@ -11,7 +11,7 @@ module ExactTargetRest
       @snake_to_camel = snake_to_camel
     end
 
-    # TriggeredSend for just one subscriber. This method exists to keep compatibility.
+    # TriggeredSend for just one subscriber.
     # @param to_address [String] Email to send.
     # @param subscriber_key [String] SubscriberKey (it uses Email if not set).
     # @param data_extension_attributes [{Symbol => Object}] List of attributes (in snake_case)
