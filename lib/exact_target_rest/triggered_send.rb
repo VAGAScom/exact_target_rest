@@ -58,6 +58,8 @@ module ExactTargetRest
 
     # TriggeredSend with loaded attributes.
     def deliver
+      tries ||= 1
+
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
           p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
@@ -82,6 +84,10 @@ module ExactTargetRest
         raise NotAuthorizedError if resp.status == 401
         resp
       end
+    rescue NotAuthorizedError
+      tries -= 1
+      retry if tries >= 0
+      raise NotAuthorizedError
     end
 
     protected
