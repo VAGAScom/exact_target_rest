@@ -22,13 +22,11 @@ module ExactTargetRest
       subscriber_key: email_address,
       ** data_extension_attributes
       )
-      @authorization.with_authorization do |access_token|
-        with_options(
-          email_address: email_address,
-          subscriber_key: subscriber_key,
-          subscriber_attributes: prepare_attributes(data_extension_attributes)
-        ).deliver
-      end
+      with_options(
+        email_address: email_address,
+        subscriber_key: subscriber_key,
+        subscriber_attributes: prepare_attributes(data_extension_attributes)
+      ).deliver
     end
 
     # Load attributes and return "self". To send using async methods.
@@ -60,28 +58,30 @@ module ExactTargetRest
 
     # TriggeredSend with loaded attributes.
     def deliver
-      resp = endpoint.post do |p|
-        p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
-        p.headers['Authorization'] = "Bearer #{@authorization.access_token}"
-        p.body = {
-          From: {
-            Address: @from_address,
-            Name: @from_name
-          },
-          To: {
-            Address: @email_address,
-            SubscriberKey: @subscriber_key,
-            ContactAttributes: {
-                SubscriberAttributes: @subscriber_attributes
+      @authorization.with_authorization do |access_token|
+        resp = endpoint.post do |p|
+          p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
+          p.headers['Authorization'] = "Bearer #{access_token}"
+          p.body = {
+            From: {
+              Address: @from_address,
+              Name: @from_name
+            },
+            To: {
+              Address: @email_address,
+              SubscriberKey: @subscriber_key,
+              ContactAttributes: {
+                  SubscriberAttributes: @subscriber_attributes
+              }
+            },
+            OPTIONS: {
+              RequestType: @request_type
             }
-          },
-          OPTIONS: {
-            RequestType: @request_type
           }
-        }
+        end
+        raise NotAuthorizedError if resp.status == 401
+        resp
       end
-      raise NotAuthorizedError if resp.status == 401
-      resp
     end
 
     protected
