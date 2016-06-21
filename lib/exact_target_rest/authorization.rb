@@ -22,7 +22,6 @@ module ExactTargetRest
     #
     # @yield [access_token] Block to be executed
     # @yieldparam access_token [String] Access token used to authorize a request
-    # @yieldparam expires_in [String] Time to token's expire
     def with_authorization
       authorize! unless authorized?
       yield @access_token
@@ -51,7 +50,7 @@ module ExactTargetRest
     protected
 
     def endpoint
-      @endpoint ||= Faraday.new(url: AUTH_URL) do |f|
+      Faraday.new(url: AUTH_URL) do |f|
         f.request :json
         f.response :json, content_type: /\bjson$/
         f.adapter FARADAY_ADAPTER

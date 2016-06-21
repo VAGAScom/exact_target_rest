@@ -2,11 +2,11 @@ module ExactTargetRest
   class TriggeredSend
     # Execute TriggeredSends to one or several subscribers.
     #
-    # @param auth [Authorization || String]
+    # @param authorization [Authorization]
     # @param external_key [String] The string that identifies the TriggeredSend
     # @param snake_to_camel [Boolean] Attributes should be converted to CamelCase? (default true)
-    def initialize(auth, external_key, snake_to_camel: true)
-      @auth = auth
+    def initialize(authorization, external_key, snake_to_camel: true)
+      @authorization = authorization
       @external_key = external_key
       @snake_to_camel = snake_to_camel
     end
@@ -22,7 +22,7 @@ module ExactTargetRest
       subscriber_key: email_address,
       ** data_extension_attributes
       )
-      @auth.with_authorization do |access_token|
+      @authorization.with_authorization do |access_token|
         with_options(
           email_address: email_address,
           subscriber_key: subscriber_key,
@@ -60,11 +60,9 @@ module ExactTargetRest
 
     # TriggeredSend with loaded attributes.
     def deliver
-      access_token = @auth.instance_of?(ExactTargetRest::Authorization) ? @auth.access_token : @auth
-
       resp = endpoint.post do |p|
         p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
-        p.headers['Authorization'] = "Bearer #{access_token}"
+        p.headers['Authorization'] = "Bearer #{@authorization.access_token}"
         p.body = {
           From: {
             Address: @from_address,
@@ -89,7 +87,7 @@ module ExactTargetRest
     protected
 
     def endpoint
-      @endpoint ||= Faraday.new(url: TRIGGERED_SEND_URL) do |f|
+      Faraday.new(url: TRIGGERED_SEND_URL) do |f|
         f.request :json
         f.response :json, content_type: /\bjson$/
         f.adapter FARADAY_ADAPTER
