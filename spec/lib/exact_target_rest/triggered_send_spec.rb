@@ -56,6 +56,20 @@ describe TriggeredSend do
 
   end
 
+  describe '#to_yaml' do
+    it "serializes and deserializes TriggeredSend" do
+      authorization = ExactTargetRest::Authorization.new("client_id", "client_secret").authorize!
+
+      ts = ExactTargetRest::TriggeredSend.new(authorization, "external_key").
+        with_options(
+          email_address: "jake@oo.com",
+          subscriber_attributes: { "City" => "São Paulo", "Profile ID" => "42" }
+          )
+
+      expect(YAML::load(ts.to_yaml)).to be_instance_of(ExactTargetRest::TriggeredSend)
+    end
+  end
+
   private
 
   def stub_requests

@@ -5,6 +5,7 @@ module ExactTargetRest
   # App Center (https://appcenter-auth.exacttargetapps.com).
   class Authorization
     attr_reader :access_token
+    attr_reader :expires_in
 
     # New authorization (it does not trigger REST yet).
     #
@@ -21,7 +22,6 @@ module ExactTargetRest
     #
     # @yield [access_token] Block to be executed
     # @yieldparam access_token [String] Access token used to authorize a request
-    # @yieldparam expires_in [String] Time to token's expire
     def with_authorization
       authorize! unless authorized?
       yield @access_token
@@ -35,8 +35,8 @@ module ExactTargetRest
       end
       if resp.success?
         @access_token = resp.body['accessToken']
-        @expires_in = Time.now + resp.body['expiresIn']
-        { access_token: @access_token, expires_in: @expires_in }
+        @expires_in = resp.body['expiresIn']
+        self
       else
         fail NotAuthorizedError
       end
@@ -44,13 +44,13 @@ module ExactTargetRest
 
     # Already authorized and NOT expired?
     def authorized?
-      @access_token && @expires_in > Time.now
+      @access_token && (Time.now + @expires_in) > Time.now
     end
 
     protected
 
     def endpoint
-      @endpoint ||= Faraday.new(url: AUTH_URL) do |f|
+      Faraday.new(url: AUTH_URL) do |f|
         f.request :json
         f.response :json, content_type: /\bjson$/
         f.adapter FARADAY_ADAPTER

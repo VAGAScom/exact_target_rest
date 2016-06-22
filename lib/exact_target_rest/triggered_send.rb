@@ -59,6 +59,7 @@ module ExactTargetRest
     # TriggeredSend with loaded attributes.
     def deliver
       tries ||= 1
+
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
           p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
@@ -92,7 +93,7 @@ module ExactTargetRest
     protected
 
     def endpoint
-      @endpoint ||= Faraday.new(url: TRIGGERED_SEND_URL) do |f|
+      Faraday.new(url: TRIGGERED_SEND_URL) do |f|
         f.request :json
         f.response :json, content_type: /\bjson$/
         f.adapter FARADAY_ADAPTER
