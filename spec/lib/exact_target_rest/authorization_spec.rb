@@ -34,8 +34,8 @@ describe Authorization do
     it "returns a valid authorization" do
       auth = subject.new(client_id, client_secret).authorize!
 
-      expect(auth[:access_token]).to eq access_token
-      expect(auth[:expires_in]).not_to be_nil
+      expect(auth.access_token).to eq access_token
+      expect(auth.expires_in).not_to be_nil
     end
 
     it "returns Unauthorized" do
@@ -45,12 +45,20 @@ describe Authorization do
     end
   end
 
+  describe '#to_yaml' do
+    it "serializes and deserializes Authorization" do
+      auth = subject.new(client_id, client_secret).authorize!
+
+      expect(YAML::load(auth.to_yaml)).to be_instance_of(ExactTargetRest::Authorization)
+    end
+  end
+
   private
 
   def stub_requests
-    stub_request(:post, "https://auth.exacttargetapis.com/v1/requestToken").
+    stub_request(:post, ExactTargetRest::AUTH_URL).
       with(
-        :body => "{\"clientId\":\"12345\",\"clientSecret\":\"Y9axRxR9bcvSW2cc0IwoWeq7\"}",
+        :body => "{\"clientId\":\"#{client_id}\",\"clientSecret\":\"#{client_secret}\"}",
         :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
         ).
       to_return(
@@ -61,7 +69,7 @@ describe Authorization do
 
     stub_request(:any, ExactTargetRest::AUTH_URL).
       with(
-        :body => "{\"clientId\":\"invalid\",\"clientSecret\":\"Y9axRxR9bcvSW2cc0IwoWeq7\"}",
+        :body => "{\"clientId\":\"invalid\",\"clientSecret\":\"#{client_secret}\"}",
         :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
         ).
       to_return(
