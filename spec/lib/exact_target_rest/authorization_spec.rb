@@ -45,6 +45,21 @@ describe Authorization do
     end
   end
 
+  describe '#authorized?' do
+    it "returns TRUE when authorization NOT Expired" do
+      auth = subject.new(client_id, client_secret).authorize!
+
+      expect(auth.authorized?).to be true
+    end
+
+    it "returns FALSE when authorization Expired" do
+      auth = subject.new(client_id, client_secret).authorize!
+
+      allow(Time).to receive(:now).and_return(auth.expires_in + 1)
+      expect(auth.authorized?).to be false
+    end
+  end
+
   describe '#to_yaml' do
     it "serializes and deserializes Authorization" do
       auth = subject.new(client_id, client_secret).authorize!
