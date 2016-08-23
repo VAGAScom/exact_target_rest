@@ -35,7 +35,7 @@ module ExactTargetRest
       end
       if resp.success?
         @access_token = resp.body['accessToken']
-        @expires_in = resp.body['expiresIn']
+        @expires_in = Time.now + resp.body['expiresIn']
         self
       else
         fail NotAuthorizedError
@@ -44,7 +44,7 @@ module ExactTargetRest
 
     # Already authorized and NOT expired?
     def authorized?
-      @access_token && (Time.now + @expires_in) > Time.now
+      @access_token && @expires_in > Time.now
     end
 
     protected
