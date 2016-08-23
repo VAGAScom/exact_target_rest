@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/exact_target_rest.svg)](https://badge.fury.io/rb/exact_target_rest)
+
 # ExactTargetRest
 
 Simple wrapper around ExactTarget REST API.
