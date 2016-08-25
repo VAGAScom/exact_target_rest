@@ -6,6 +6,7 @@ module ExactTargetRest
   class Authorization
     attr_reader :access_token
     attr_reader :expires_in
+    attr_reader :expires_at
 
     # New authorization (it does not trigger REST yet).
     #
@@ -35,7 +36,8 @@ module ExactTargetRest
       end
       if resp.success?
         @access_token = resp.body['accessToken']
-        @expires_in = Time.now + resp.body['expiresIn']
+        @expires_in = resp.body['expiresIn']
+        @expires_at = Time.now + @expires_in
         self
       else
         fail NotAuthorizedError
@@ -44,7 +46,7 @@ module ExactTargetRest
 
     # Already authorized and NOT expired?
     def authorized?
-      @access_token && @expires_in > Time.now
+      @access_token && @expires_at > Time.now
     end
 
     protected
