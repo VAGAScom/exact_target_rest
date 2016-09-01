@@ -55,7 +55,7 @@ describe Authorization do
     it "returns FALSE when authorization Expired" do
       auth = subject.new(client_id, client_secret).authorize!
 
-      allow(Time).to receive(:now).and_return(auth.expires_in + 1)
+      allow(Time).to receive(:now).and_return(auth.expires_at + 1)
       expect(auth.authorized?).to be false
     end
   end
