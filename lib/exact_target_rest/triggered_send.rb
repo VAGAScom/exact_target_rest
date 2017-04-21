@@ -11,6 +11,12 @@ module ExactTargetRest
       @snake_to_camel = snake_to_camel
     end
 
+    # Customize the Faraday connection by passing in a block
+    #
+    def setup_connection(&block)
+      @endpoint = endpoint(&block)
+    end
+
     # TriggeredSend for just one subscriber.
     # @param to_address [String] Email to send.
     # @param subscriber_key [String] SubscriberKey (it uses Email if not set).
@@ -57,7 +63,7 @@ module ExactTargetRest
     end
 
     # TriggeredSend with loaded attributes.
-    def deliver
+    def deliver(&block)
       tries ||= 1
 
       @authorization.with_authorization do |access_token|
@@ -82,6 +88,7 @@ module ExactTargetRest
           }
         end
         raise NotAuthorizedError if resp.status == 401
+        block.call(resp) if block_given?
         resp
       end
     rescue NotAuthorizedError
@@ -92,12 +99,16 @@ module ExactTargetRest
 
     protected
 
-    def endpoint
-      Faraday.new(url: TRIGGERED_SEND_URL) do |f|
-        f.request :json
-        f.response :json, content_type: /\bjson$/
-        f.adapter FARADAY_ADAPTER
-      end
+    def endpoint(&block)
+      @endpoint || Faraday.new(url: TRIGGERED_SEND_URL) do |f|
+                     f.request :json
+                     f.response :json, content_type: /\bjson$/
+                     if block_given?
+                       block.call(f)
+                     else
+                       f.adapter FARADAY_ADAPTER
+                     end
+                   end
     end
 
     def prepare_attributes(attributes)

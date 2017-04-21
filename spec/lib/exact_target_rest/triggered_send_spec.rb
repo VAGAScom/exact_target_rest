@@ -16,6 +16,14 @@ describe TriggeredSend do
     stub_requests
   end
 
+  describe '#setup_connection' do
+    it 'takes a block to customize the faraday connection' do
+      block = Proc.new {|conn| puts "conn" }
+      expect(block).to receive(:call)
+      subject.setup_connection(&block)
+    end
+  end
+
   describe '#send_one' do
     it "sends a simple TriggeredSend" do
       response = subject.send_one(email_address: "jake@oo.com")
@@ -51,6 +59,16 @@ describe TriggeredSend do
         email_address: "jake@oo.com",
         subscriber_attributes: { "City" => "São Paulo", "Profile ID" => "42" }
         ).deliver
+      expect(response.body["requestId"]).to eq "uncommon-key-response-id"
+    end
+
+    it "accepts a block to handle responses" do
+      block = Proc.new { |resp| puts "hello" }
+      expect(block).to receive(:call)
+      response = subject.with_options(
+        email_address: "jake@oo.com",
+        subscriber_attributes: { "City" => "São Paulo", "Profile ID" => "42" }
+        ).deliver(&block)
       expect(response.body["requestId"]).to eq "uncommon-key-response-id"
     end
 

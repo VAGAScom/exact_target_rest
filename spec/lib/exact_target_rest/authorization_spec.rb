@@ -30,6 +30,14 @@ describe Authorization do
     end
   end
 
+  describe '#setup_connection' do
+    it 'takes a block to customize the faraday connection' do
+      block = Proc.new {|conn| puts "conn" }
+      expect(block).to receive(:call)
+      subject.new(client_id, client_secret).setup_connection(&block)
+    end
+  end
+
   describe '#authorize!' do
     it "returns a valid authorization" do
       auth = subject.new(client_id, client_secret).authorize!
