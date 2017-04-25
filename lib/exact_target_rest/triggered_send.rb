@@ -63,7 +63,7 @@ module ExactTargetRest
     end
 
     # TriggeredSend with loaded attributes.
-    def deliver(&block)
+    def deliver
       tries ||= 1
 
       @authorization.with_authorization do |access_token|
@@ -88,7 +88,7 @@ module ExactTargetRest
           }
         end
         raise NotAuthorizedError if resp.status == 401
-        block.call(resp) if block_given?
+        yield resp if block_given?
         resp
       end
     rescue NotAuthorizedError

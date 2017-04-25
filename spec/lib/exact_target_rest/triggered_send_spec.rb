@@ -63,13 +63,13 @@ describe TriggeredSend do
     end
 
     it "accepts a block to handle responses" do
-      block = Proc.new { |resp| puts "hello" }
-      expect(block).to receive(:call)
-      response = subject.with_options(
-        email_address: "jake@oo.com",
-        subscriber_attributes: { "City" => "São Paulo", "Profile ID" => "42" }
+      expect do |block|
+        response = subject.with_options(
+          email_address: "jake@oo.com",
+          subscriber_attributes: { "City" => "São Paulo", "Profile ID" => "42" }
         ).deliver(&block)
-      expect(response.body["requestId"]).to eq "uncommon-key-response-id"
+        expect(response.body["requestId"]).to eq "uncommon-key-response-id"
+      end.to yield_control
     end
 
   end
