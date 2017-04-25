@@ -16,6 +16,12 @@ module ExactTargetRest
       @client_id, @client_secret = client_id, client_secret
     end
 
+    # Customize the Faraday connection by passing in a block
+    #
+    def setup_connection(&block)
+      @endpoint = endpoint(&block)
+    end
+
     # Guarantee the block to run authorized.
     #
     # If not yet authorized, it runs authorization.
@@ -51,12 +57,16 @@ module ExactTargetRest
 
     protected
 
-    def endpoint
-      Faraday.new(url: AUTH_URL) do |f|
-        f.request :json
-        f.response :json, content_type: /\bjson$/
-        f.adapter FARADAY_ADAPTER
-      end
+    def endpoint(&block)
+      @endpoint || Faraday.new(url: AUTH_URL) do |f|
+                     f.request :json
+                     f.response :json, content_type: /\bjson$/
+                     if block_given?
+                       block.call(f)
+                     else
+                       f.adapter FARADAY_ADAPTER
+                     end
+                   end
     end
   end
 end
