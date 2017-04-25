@@ -26,12 +26,12 @@ module ExactTargetRest
     def send_one(
       email_address:,
       subscriber_key: email_address,
-      subscriber_attributes: {}
+      ** data_extension_attributes
       )
       with_options(
         email_address: email_address,
         subscriber_key: subscriber_key,
-        subscriber_attributes: prepare_attributes(subscriber_attributes)
+        subscriber_attributes: prepare_attributes(data_extension_attributes)
       ).deliver
     end
 

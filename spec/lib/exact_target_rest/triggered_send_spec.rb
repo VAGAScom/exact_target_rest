@@ -33,10 +33,9 @@ describe TriggeredSend do
     it "sends a TriggeredSend with DataExtension" do
       response = subject.send_one(
         email_address: "jake@oo.com",
-        subscriber_attributes: {
-          city: "São Paulo",
-          zip: "04063-040"
-        })
+        city: "São Paulo",
+        zip: "04063-040"
+        )
       expect(response.body["requestId"]).to eq "data-extension-response-id"
     end
   end
