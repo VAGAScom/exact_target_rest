@@ -11,7 +11,7 @@ describe DataExtension do
     authorization = instance_double("ExactTargetRest::Authorization")
     allow(authorization).to receive(:with_authorization).and_yield(access_token)
     allow(authorization).to receive(:rest_instance_url).and_return(rest_instance_url)
-    described_class.new(authorization,external_key)
+    described_class.new(authorization, external_key)
   end
 
   before do
@@ -22,7 +22,7 @@ describe DataExtension do
     it "does an upsert and return 200" do
       stub_successful_upsert
 
-      response = subject.upsert({foo: 'bar'})
+      response = subject.upsert({ foo: 'bar' })
       expect(response.status).to eq 200
     end
 
@@ -30,7 +30,7 @@ describe DataExtension do
       stub_unauthorized_upsert
 
       expect {
-        subject.upsert({foo: 'bar'})
+        subject.upsert({ foo: 'bar' })
       }.to raise_error(NotAuthorizedError)
     end
 
@@ -38,7 +38,7 @@ describe DataExtension do
       stub_malformed_upsert
 
       expect {
-        subject.upsert({foo: 'bar'})
+        subject.upsert({ foo: 'bar' })
       }.to raise_error(StandardError, /Unable to save rows/)
     end
   end
@@ -48,7 +48,7 @@ describe DataExtension do
   def stub_authentication
     stub_request(:any, "#{auth_url}#{AUTH_PATH}").
       to_return(
-        headers: {"Content-Type"=> "application/json"},
+        headers: { "Content-Type" => "application/json" },
         body: %({"access_token": "75sf4WWbwfr6HYd5URpC6KBk", "expires_in": 3600}),
         status: 200
       )
@@ -57,7 +57,13 @@ describe DataExtension do
   def upsert_body
     {
       :body => "[{\"keys\":{},\"values\":{\"Foo\":\"bar\"}}]",
-      :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.17.3'}
+      :headers => {
+        'Accept' => '*/*',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Authorization' => "Bearer #{access_token}",
+        'Content-Type' => 'application/json',
+        'User-Agent' => %r'Faraday v.*'
+      }
     }
   end
 
@@ -65,7 +71,7 @@ describe DataExtension do
     stub_request(:post, data_extension_url).
       with(upsert_body).
       to_return(
-        headers: {"Content-Type"=> "application/json"},
+        headers: { "Content-Type" => "application/json" },
         body: "",
         status: 200
       )
@@ -75,7 +81,7 @@ describe DataExtension do
     stub_request(:post, data_extension_url).
       with(upsert_body).
       to_return(
-        headers: {"Content-Type"=> "application/json"},
+        headers: { "Content-Type" => "application/json" },
         body: "",
         status: 401
       )
@@ -85,7 +91,7 @@ describe DataExtension do
     stub_request(:post, data_extension_url).
       with(upsert_body).
       to_return(
-        headers: {"Content-Type"=> "application/json"},
+        headers: { "Content-Type" => "application/json" },
         body: "Unable to save rows",
         status: 400
       )
