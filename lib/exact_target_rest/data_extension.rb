@@ -1,5 +1,7 @@
 module ExactTargetRest
   class DataExtension
+    attr_reader :authorization
+
     # Execute operations over DataExtension
     #
     # @param authorization [Authorization]
@@ -27,6 +29,7 @@ module ExactTargetRest
           p.headers['Authorization'] = "Bearer #{access_token}"
           p.body = @param_formatter.transform(data_extension_rows)
         end
+        raise StandardError.new(resp.body) if resp.status == 400
         raise NotAuthorizedError if resp.status == 401
         resp
       end
@@ -35,7 +38,7 @@ module ExactTargetRest
     protected
 
     def endpoint
-      @endpoint ||= Faraday.new(url: DATA_EXTENSION_URL) do |f|
+      @endpoint ||= Faraday.new(url: authorization.rest_instance_url) do |f|
         f.request :json
         f.response :json, content_type: /\bjson$/
         f.adapter FARADAY_ADAPTER

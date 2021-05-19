@@ -1,5 +1,7 @@
 module ExactTargetRest
   class TriggeredSend
+    attr_reader :authorization
+
     # Execute TriggeredSends to one or several subscribers.
     #
     # @param authorization [Authorization]
@@ -93,7 +95,7 @@ module ExactTargetRest
     protected
 
     def endpoint
-      Faraday.new(url: TRIGGERED_SEND_URL) do |f|
+      Faraday.new(url: authorization.rest_instance_url) do |f|
         f.request :json
         f.response :json, content_type: /\bjson$/
         f.adapter FARADAY_ADAPTER

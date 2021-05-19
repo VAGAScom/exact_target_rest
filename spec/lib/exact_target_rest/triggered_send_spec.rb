@@ -1,7 +1,8 @@
 require 'spec_helper'
 
 describe TriggeredSend do
-
+  let(:auth_url) { "https://auth-url" }
+  let(:rest_instance_url) { "https://instance-url" }
   let(:external_key) { "12345" }
   let(:access_token) { "Y9axRxR9bcvSW2cc0IwoWeq7" }
   let(:expires_in) { 3600 }
@@ -9,6 +10,7 @@ describe TriggeredSend do
   subject do
     authorization = instance_double("ExactTargetRest::Authorization")
     allow(authorization).to receive(:with_authorization).and_yield(access_token)
+    allow(authorization).to receive(:rest_instance_url).and_return(rest_instance_url)
     described_class.new(authorization,external_key)
   end
 
@@ -58,7 +60,7 @@ describe TriggeredSend do
 
   describe '#to_yaml' do
     it "serializes and deserializes TriggeredSend" do
-      authorization = ExactTargetRest::Authorization.new("client_id", "client_secret").authorize!
+      authorization = ExactTargetRest::Authorization.new(auth_url, "client_id", "client_secret").authorize!
 
       ts = ExactTargetRest::TriggeredSend.new(authorization, "external_key").
         with_options(
@@ -73,17 +75,17 @@ describe TriggeredSend do
   private
 
   def stub_requests
-    stub_request(:any, ExactTargetRest::AUTH_URL).
+    stub_request(:any, "#{auth_url}#{AUTH_PATH}").
       to_return(
         headers: {"Content-Type"=> "application/json"},
-        body: %({"accessToken": "75sf4WWbwfr6HYd5URpC6KBk", "expiresIn": 3600}),
+        body: %({"access_token": "75sf4WWbwfr6HYd5URpC6KBk", "expires_in": 3600}),
         status: 200
       )
 
     stub_request(:post, triggered_send_url).
       with(
         :body => "{\"From\":{\"Address\":\"\",\"Name\":\"\"},\"To\":{\"Address\":\"jake@oo.com\",\"SubscriberKey\":\"jake@oo.com\",\"ContactAttributes\":{\"SubscriberAttributes\":{\"City\":\"São Paulo\",\"Zip\":\"04063-040\"}}},\"OPTIONS\":{\"RequestType\":\"ASYNC\"}}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
+        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.17.3'}
       ).
       to_return(
         headers: {"Content-Type"=> "application/json"},
@@ -94,7 +96,7 @@ describe TriggeredSend do
     stub_request(:post, triggered_send_url).
       with(
         :body => "{\"From\":{\"Address\":\"\",\"Name\":\"\"},\"To\":{\"Address\":\"jake@oo.com\",\"SubscriberKey\":\"jake@oo.com\",\"ContactAttributes\":{\"SubscriberAttributes\":{\"City\":\"São Paulo\",\"Profile ID\":\"42\"}}},\"OPTIONS\":{\"RequestType\":\"ASYNC\"}}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
+        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.17.3'}
       ).
       to_return(
         headers: {"Content-Type"=> "application/json"},
@@ -105,7 +107,7 @@ describe TriggeredSend do
     stub_request(:post, triggered_send_url).
       with(
         :body => "{\"From\":{\"Address\":\"\",\"Name\":\"\"},\"To\":{\"Address\":\"jake@oo.com\",\"SubscriberKey\":\"jake@oo.com\",\"ContactAttributes\":{\"SubscriberAttributes\":{}}},\"OPTIONS\":{\"RequestType\":\"ASYNC\"}}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.9.2'}
+        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Authorization'=>"Bearer #{access_token}", 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.17.3'}
         ).
       to_return(
         headers: {"Content-Type"=> "application/json"},
@@ -115,7 +117,7 @@ describe TriggeredSend do
   end
 
   def triggered_send_url
-    "#{TRIGGERED_SEND_URL}#{TRIGGERED_SEND_PATH}" % external_key
+    "#{rest_instance_url}#{TRIGGERED_SEND_PATH}" % external_key
   end
 
   def stub_response(mockId)

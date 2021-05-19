@@ -21,10 +21,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday', '~> 0.9'
   spec.add_dependency 'faraday_middleware', '~> 0.9'
 
-  spec.add_development_dependency 'bundler', '~> 1.7'
+  spec.add_development_dependency 'bundler', '~> 2.1.4'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'guard-rspec', '~> 4.5'
-  spec.add_development_dependency 'pry', '~> 0.10'
-  spec.add_development_dependency 'pry-byebug', '~> 3.4.0'
-  spec.add_development_dependency 'webmock', '~> 2.1.0'
+  spec.add_development_dependency 'pry', '~> 0.13'
+  spec.add_development_dependency 'pry-byebug', '~> 3.9.0'
+  spec.add_development_dependency 'webmock', '~> 3.10.0'
 end

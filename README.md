@@ -6,6 +6,8 @@ Simple wrapper around ExactTarget REST API.
 
 It deals with authorization and with coding conventions (CamelCase vs snake_case).
 
+It only supports packages with enhanced functionality (v2), legacy packages are unsupported (v1).
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -29,9 +31,10 @@ Be sure you have a "Client ID" and a "Client Secret". You can create one in [Exa
 Before anything else, create an **Authorization**:
 
 ```ruby
+auth_url = 'https://acyy6lj5zj3n7gsltjmgv12k0x80.auth.marketingcloudapis.com'
 client_id = '123456'
 client_secret = '999999999'
-auth = ExactTargetRest::Authorization.new(client_id, client_secret)
+auth = ExactTargetRest::Authorization.new(auth_url, client_id, client_secret)
 ```
 
 ### TriggeredSend Activation

@@ -1,0 +1,12 @@
+name: exact-target-rest
+
+up:
+  - ruby: 2.6.5
+  - bundler
+
+commands:
+  test:
+    syntax:
+      argument: file
+      optional: args...
+    run: bundle exec rspec "$@"
