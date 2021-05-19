@@ -76,10 +76,15 @@ describe Authorization do
     stub_request(:post, "#{auth_url}#{AUTH_PATH}").
       with(
         :body => "{\"client_id\":\"#{client_id}\",\"client_secret\":\"#{client_secret}\",\"grant_type\":\"client_credentials\"}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.17.3'}
-        ).
+        :headers => {
+          'Accept' => '*/*',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Content-Type' => 'application/json',
+          'User-Agent' => %r'Faraday v.*'
+        }
+      ).
       to_return(
-        headers: {"Content-Type"=> "application/json"},
+        headers: { "Content-Type" => "application/json" },
         body: %({"access_token": "#{access_token}", "expires_in": 3600, "rest_instance_url": "#{rest_instance_url}"}),
         status: 200
       )
@@ -87,10 +92,15 @@ describe Authorization do
     stub_request(:any, "#{auth_url}#{AUTH_PATH}").
       with(
         :body => "{\"client_id\":\"invalid\",\"client_secret\":\"#{client_secret}\",\"grant_type\":\"client_credentials\"}",
-        :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'application/json', 'User-Agent'=>'Faraday v0.17.3'}
-        ).
+        :headers => {
+          'Accept' => '*/*',
+          'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'Content-Type' => 'application/json',
+          'User-Agent' => %r'Faraday v.*'
+        }
+      ).
       to_return(
-        headers: {"Content-Type"=> "application/json"},
+        headers: { "Content-Type" => "application/json" },
         body: %({"message": "Unauthorized","errorcode": 1,"documentation": ""}),
         status: 401
       )
