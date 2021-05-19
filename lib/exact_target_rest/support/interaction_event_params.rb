@@ -1,7 +1,7 @@
 module ExactTargetRest
   # Transformer for InteractionEvent payload
   class InteractionEventParams
-    def initialize(*top_level_fields, snake_to_camel: true)
+    def initialize(*top_level_fields)
       @top_level_fields = top_level_fields.map(&:to_sym)
     end
 
