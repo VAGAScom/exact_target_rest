@@ -19,7 +19,7 @@ module ExactTargetRest
           p.body = @params_formatter.transform(params)
         end
         raise NotAuthorizedError if resp.status == 401
-        raise StandardError.new(resp.body) if resp.status != 200 and resp.status != 401
+        raise StandardError.new(resp.body) unless resp.success?
         resp
       end
     end
