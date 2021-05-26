@@ -37,8 +37,8 @@ describe InteractionEvent do
         .to raise_error(NotAuthorizedError)
     end
 
-    describe "raises StandardError if status code is not 200 or 401:" do
-      [400, 404, 500].each do |status_code|
+    describe "raises StandardError if status code is not successful (200..299):" do
+      [400, 404, 500, 503, 504].each do |status_code|
         it "status code #{status_code}" do
           stub_request(:post, start_journey_path)
             .with(self.request_data)
@@ -48,6 +48,19 @@ describe InteractionEvent do
             subject.start_journey(event_definition_key: 'event_definition_key', contact_key: 'contact_key')
           }
             .to raise_error(StandardError, 'Error message')
+        end
+      end
+    end
+
+    describe "No error raised if status code is successful (200..299):" do
+      (200..204).each do |status_code|
+        it "status code #{status_code}" do
+          stub_request(:post, start_journey_path)
+            .with(self.request_data)
+            .to_return(self.response_data)
+
+          expect(subject.start_journey(event_definition_key: 'event_definition_key', contact_key: 'contact_key').body)
+            .to eq({ 'eventInstanceId' => event_instance_id })
         end
       end
     end
