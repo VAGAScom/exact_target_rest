@@ -64,7 +64,7 @@ module ExactTargetRest
 
       @authorization.with_authorization do |access_token|
         resp = endpoint.post do |p|
-          p.url(format(TRIGGERED_SEND_PATH, URI.encode(@external_key)))
+          p.url(format(TRIGGERED_SEND_PATH, Addressable::URI.encode(@external_key)))
           p.headers['Authorization'] = "Bearer #{access_token}"
           p.body = {
             From: {
